@@ -1,4 +1,4 @@
-import pygame, random, math, numpy as np
+import pygame, random, math
 pygame.init()
 pygame.mixer.init()
 display = pygame.display.set_mode((1000, 800))
@@ -39,8 +39,8 @@ def text(msg, colour):
 def tmatrix(matrix, vector):
     return [matrix[0][0]*vector[0]+matrix[0][1]*vector[1], matrix[1][0]*vector[0]+matrix[1][1]*vector[1]]
 def rmatrix(theta, vector, x):
-    vec0 = tmatrix([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]], vector)
-    vec1 = tmatrix([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]], lightf(vector))
+    vec0 = tmatrix([[math.cos(theta), -math.sin(theta)], [math.sin(theta), math.cos(theta)]], vector)
+    vec1 = tmatrix([[math.cos(theta), -math.sin(theta)], [math.sin(theta), math.cos(theta)]], lightf(vector))
     m = (vec1[1] - vec0[1]) / (vec1[0] - vec0[0])
     c = vec0[1] - m * vec0[0]
     return m * x + c
@@ -104,12 +104,12 @@ while not done:
             collided = True
             dx = circs[y * 2][0] - light[0]
             dy = circs[y * 2][1] - light[1]
-            d = np.sqrt(dx ** 2 + dy ** 2)
-            theta = np.arcsin(dy/d)
+            d = math.sqrt(dx ** 2 + dy ** 2)
+            theta = math.asin(dy/d)
             print("Collision!")
-            print(f"{theta * 180 / np.pi=}")
+            print(f"{theta * 180 / math.pi=}")
             collision_points.append(light)
-            lightf = lambda t: (t[0] - math.cos(np.pi+2*theta), t[1] - math.sin(np.pi+2*theta))
+            lightf = lambda t: (t[0] - math.cos(math.pi+2*theta), t[1] - math.sin(math.pi+2*theta))
             channel1.play(hit, maxtime=200)
 
     display.blit(screen, (0, 0))
