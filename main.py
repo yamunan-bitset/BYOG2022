@@ -1,5 +1,6 @@
 import pygame, random, math, numpy as np
 pygame.init()
+pygame.mixer.init()
 display = pygame.display.set_mode((1000, 800))
 screen = pygame.Surface(display.get_size())
 pygame.display.set_caption("Light")
@@ -14,8 +15,20 @@ light = light_start
 lightf = lambda t: (t[0]+1, t[1])
 done = False
 collided = False
-
+game_over_played = False
 collision_points = [light_start]
+
+channel1 = pygame.mixer.Channel(1)
+hit = pygame.mixer.Sound("sfx/c.wav")
+font = pygame.font.Font('freesansbold.ttf', 40)
+
+def gameover():
+    text = font.render("Game over!", True, (100, 0, 0), (170, 140, 0))
+    rect = text.get_rect()
+    rect.centerx += 500 + random.randint(-3, 3)
+    rect.centery += 400 + random.randint(-3, 3)
+    screen.blit(text, rect)
+
 
 def tmatrix(matrix, vector):
     return [matrix[0][0]*vector[0]+matrix[0][1]*vector[1], matrix[1][0]*vector[0]+matrix[1][1]*vector[1]]
@@ -25,7 +38,7 @@ def rmatrix(theta, vector, x):
     m = (vec1[1] - vec0[1]) / (vec1[0] - vec0[0])
     c = vec0[1] - m * vec0[0]
     return m * x + c
-
+pygame.mixer.Channel(0).play(pygame.mixer.Sound("sfx/a.wav"), maxtime=200)
 while not done:
     clock.tick(60)
     for event in pygame.event.get():
@@ -63,22 +76,30 @@ while not done:
         pygame.draw.line(screen, (250, 250, 250), collision_points[-1], light, 5)
     else:
         pygame.draw.line(screen, (250, 250, 250), light_start, light, 5)
+    
+    pygame.draw.line(screen, (100, 0, 0), light, lightf(lightf(lightf(light))), 7)
+
+    if light[0] > 1000 or light[0] < 0 or light[1] > 800 or light[1] < 0:
+        if not game_over_played:
+            pygame.mixer.Channel(2).play(pygame.mixer.Sound("sfx/e.wav"), maxtime=200)
+            game_over_played = True
+        gameover()
+        dt = pygame.time.get_ticks()
+        if dt - pygame.time.get_ticks() > 1000:
+            break
 
     for y in range(len(circsf)):
         if math.isclose(circsf[y](light[0]), light[1], abs_tol = 5):
             collided = True
-            dx = circs[y][0] - light[0]
-            dy = circs[y][1] - light[1]
+            dx = circs[y * 2][0] - light[0]
+            dy = circs[y * 2][1] - light[1]
             d = np.sqrt(dx ** 2 + dy ** 2)
             theta = np.arcsin(dy/d)
             print("Collision!")
             print(f"{theta * 180 / np.pi=}")
             collision_points.append(light)
-            """y = lambda x: rmatrix((180+2*theta), light, x)
-            lightf = lambda t: (t[0], y(t[0]))
-            light = lightf(light)
-            print(collision_points)"""
             lightf = lambda t: (t[0] - math.cos(np.pi+2*theta), t[1] - math.sin(np.pi+2*theta))
+            channel1.play(hit, maxtime=200)
             break
     display.blit(screen, (0, 0))
     pygame.display.update()
