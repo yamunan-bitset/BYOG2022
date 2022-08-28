@@ -58,16 +58,16 @@ while not done:
             circ2 = circ1
 
     if collided:
-        pygame.draw.line(screen, (250, 250, 250), light_start, collision_points[-1], 5)
+        pygame.draw.line(screen, (250, 250, 250), light_start, collision_points[0], 5)
         for i in range(len(collision_points) - 1):
-            pygame.draw.line(screen, (250, 250, 250), collision_points[-1 - i])
-        pygame.draw.line(screen, (250, 250, 250), collision_points[-1 - i], light, 5)
+            pygame.draw.line(screen, (250, 250, 250), collision_points[i], collision_points[i + 1], 5)
+        pygame.draw.line(screen, (250, 250, 250), collision_points[-1], light, 5)
     else:
         pygame.draw.line(screen, (250, 250, 250), light_start, light, 5)
-        
+
     for y in range(len(circsf)):
         if math.isclose(circsf[y](light[0]), light[1], abs_tol = 5):
-            colided = True
+            collided = True
             dx = circs[y][0] - light[0]
             dy = circs[y][1] - light[1]
             d = np.sqrt(dx ** 2 + dy ** 2)
