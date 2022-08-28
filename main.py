@@ -9,8 +9,8 @@ dt = pygame.time.get_ticks()
 circs = []
 circsf = []
 hold = False
-pos = (random.randint(100, 900), random.randint(100, 700))
-light_start = (pos[0], pos[1])
+light_start = (random.randint(100, 900), random.randint(100, 700))
+target_pos = (random.randint(100, 900), random.randint(100, 700))
 light = light_start
 lightf = lambda t: (t[0]+1, t[1])
 done = False
@@ -20,10 +20,16 @@ collision_points = [light_start]
 
 channel1 = pygame.mixer.Channel(1)
 hit = pygame.mixer.Sound("sfx/c.wav")
-font = pygame.font.Font('freesansbold.ttf', 40)
+font = pygame.font.Font("freesansbold.ttf", 40)
+source = pygame.image.load("gfx/source.png")
+srect = source.get_rect()
+srect.center = light_start
+target = pygame.image.load("gfx/target.png")
+trect = target.get_rect()
+trect.center = target_pos
 
-def gameover():
-    text = font.render("Game over!", True, (100, 0, 0), (170, 140, 0))
+def text(msg, colour):
+    text = font.render(msg, True, colour, (0, 0, 0))
     rect = text.get_rect()
     rect.centerx += 500 + random.randint(-3, 3)
     rect.centery += 400 + random.randint(-3, 3)
@@ -55,9 +61,10 @@ while not done:
                     m = (circs[-2][1] - circs[-1][1])/(circs[-2][0] - circs[-1][0])
                 c = circs[-1][1] - m * circs[-1][0]
                 circsf.append(lambda x: m*x+c)
-    screen.fill((170, 140, 0))
-    pygame.draw.circle(screen, (200, 100, 240), pos, 50)
-    pygame.draw.circle(screen, (240, 170, 250), pos, 25)
+    #screen.fill((170, 140, 0))
+    screen.fill((0, 0, 0))
+    screen.blit(source, srect)
+    screen.blit(target, trect)
     light = lightf(light)
     i = 0
     for circ1 in circs:
@@ -83,10 +90,14 @@ while not done:
         if not game_over_played:
             pygame.mixer.Channel(2).play(pygame.mixer.Sound("sfx/e.wav"), maxtime=200)
             game_over_played = True
-        gameover()
+        text("Game Over!!", (100, 0, 0))
         dt = pygame.time.get_ticks()
         if dt - pygame.time.get_ticks() > 1000:
             break
+
+    if math.isclose(light[0], target_pos[0], abs_tol = 40) and math.isclose(light[1], target_pos[1], abs_tol = 40):
+        text("Congrats", (0, 0, 100))
+        lightf = lambda t: t
 
     for y in range(len(circsf)):
         if math.isclose(circsf[y](light[0]), light[1], abs_tol = 5):
@@ -100,7 +111,7 @@ while not done:
             collision_points.append(light)
             lightf = lambda t: (t[0] - math.cos(np.pi+2*theta), t[1] - math.sin(np.pi+2*theta))
             channel1.play(hit, maxtime=200)
-            break
+
     display.blit(screen, (0, 0))
     pygame.display.update()
 pygame.quit()
