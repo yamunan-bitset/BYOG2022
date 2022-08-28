@@ -1,4 +1,3 @@
-from decimal import DivisionByZero
 import pygame, random, math, numpy as np
 pygame.init()
 display = pygame.display.set_mode((1000, 800))
@@ -20,12 +19,12 @@ collision_points = [light_start]
 
 def tmatrix(matrix, vector):
     return [matrix[0][0]*vector[0]+matrix[0][1]*vector[1], matrix[1][0]*vector[0]+matrix[1][1]*vector[1]]
-def rmatrix(theta, vector, rotate=False):
-    if rotate:
-        vec = tmatrix([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]], vector)
-    else:
-        vec = vector
-    return (vec[0] + np.cos((theta - 180)/2), vec[1] + np.sin((theta - 180)/2))
+def rmatrix(theta, vector, x):
+    vec0 = tmatrix([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]], vector)
+    vec1 = tmatrix([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]], lightf(vector))
+    m = (vec1[1] - vec0[1]) / (vec1[0] - vec0[0])
+    c = vec0[1] - m * vec0[0]
+    return m * x + c
 
 while not done:
     clock.tick(60)
@@ -75,10 +74,11 @@ while not done:
             print("Collision!")
             print(f"{theta * 180 / np.pi=}")
             collision_points.append(light)
-            light = rmatrix((180-2*theta), light, rotate=True)
-            lightf = lambda t: rmatrix((180+2*theta), t)
+            """y = lambda x: rmatrix((180+2*theta), light, x)
+            lightf = lambda t: (t[0], y(t[0]))
             light = lightf(light)
-            print(collision_points)
+            print(collision_points)"""
+            lightf = lambda t: (t[0] - math.cos(np.pi+2*theta), t[1] - math.sin(np.pi+2*theta))
             break
     display.blit(screen, (0, 0))
     pygame.display.update()
